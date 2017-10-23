@@ -2,8 +2,8 @@
   "name": "kritter-backend",
   "version": "1.0.0",
   "main": "index.js",
-  "repository": "git@github.com:slugbyte/sluggram.git",
-  "author": "Duncan Marsh <dwolfm@gmail.com>",
+  "repository": "https://github.com/arn1313/kritter-backend",
+  "author": "kritter",
   "license": "MIT",
   "jest": {
     "verbose": true,

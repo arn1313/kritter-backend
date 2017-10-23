@@ -1,9 +1,7 @@
 import User from './user.js';
-import Profile from './profile.js';
-import Photo from './photo.js';
+import Photo from './post.js';
 
 export default (db) => {
   User(db);
-  Profile(db);
   Photo(db);
 };

@@ -42,6 +42,16 @@ userSchema.methods.tokenCreate  = function(){
 // MODEL
 const User = Mongoose.model('user', userSchema);
 
+User.validateReqFile = function (req) {
+ if(req.files.length > 1){
+   return util.removeMulterFiles(req.files)
+     .then(() => {
+       throw createError(400, 'VALIDATION ERROR: only one file permited');
+     });
+ }
+}
+
+
 // STATIC METHODS
 User.create = function (user) {
   if(!user.password || !user.email || !user.username)
@@ -75,6 +85,45 @@ User.handleOAUTH = function(data) {
     }).save()
   })
 }
+
+User.fetch = util.pagerCreate(User);
+
+User.fetchOne = function(req){
+ return User.findById(req.params.id)
+   .then(user => {
+     if(!user)
+       throw createError(404, 'NOT FOUND ERROR: user not found'); 
+     return user;
+   });
+};
+
+User.updateUserWithPhoto = function(req) {
+ return User.validateReqFile(req)
+   .then(file => {
+     return util.s3UploadMulterFileAndClean(file)
+       .then((s3Data) => {
+         let update = {avatar: s3Data.Location};
+         if(req.body.bio) update.bio = req.body.bio; 
+         return User.findByIdAndUpdate(req.params.id, update, {new: true, runValidators: true});
+       });
+   });
+};
+
+User.update = function(req){
+ if(req.files && req.files[0])
+   return User.updateUserWithPhoto(req);
+ let options = {new: true, runValidators: true};
+ return Profile.findByIdAndUpdate(req.params.id, {bio: req.body.bio}, options);
+};
+
+User.delete = function(req){
+ return User.findOneAndRemove({_id: req.params.id})
+   .then(user => {
+     if(!user)
+       throw createError(404, 'NOT FOUND ERROR: user not found');
+   });
+};
+
 
 // INTERFACE
 export default User;

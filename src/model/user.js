@@ -6,6 +6,7 @@ import {randomBytes} from 'crypto';
 import * as jwt from 'jsonwebtoken';
 import createError from 'http-errors';
 import {promisify} from '../lib/util.js';
+import * as util from '../lib/util.js';
 import Mongoose, {Schema} from 'mongoose';
 
 // SCHEMA

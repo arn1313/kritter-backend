@@ -29,7 +29,7 @@ export const basicAuth = (req, res, next) => {
 };
 
 export const bearerAuth = (req, res, next) => {
-  let {authorization} = req.headers:
+  let {authorization} = req.headers;
   if(!authorization) return next(createError(400, 'AUTH ERROR: no authorization header'));
 
   let token = authorization.split('Bearer')[1];

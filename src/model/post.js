@@ -10,7 +10,7 @@ const postSchema = new Schema({
   comments: [{type: Schema.Types.ObjectId}],
 });
 
-const Post = Mongoose.model('post', photoSchema); 
+const Post = Mongoose.model('post', postSchema); 
 
 Post.validateRequest = function(req){
 
@@ -97,5 +97,5 @@ Post.delete = function(req){
     });
 };
 
-export default Photo;
+export default Post;
 

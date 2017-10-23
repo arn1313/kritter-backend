@@ -3,7 +3,7 @@ import superagent from 'superagent';
 import {Router} from 'express';
 import User from '../model/user.js';
 import parserBody from './parser-body.js';
-import {basicAuth} from './parser-auth.js';
+import {basicAuth, bearerAuth} from './parser-auth.js';
 import {log, daysToMilliseconds} from '../lib/util.js';
 
 export default new Router()
@@ -38,30 +38,31 @@ export default new Router()
         res.send(token);
       })
       .catch(next);
-  });
+  })
 
  //  .post('/users', bearerAuth, parserBody, (req, res, next) => {
  //   User.create(req)
  //     .then(res.json)
  //     .catch(next);
  // })
- .get('/users', (req, res, next) => {
-   User.fetch(req)
-     .then(res.page)
-     .catch(next);
- })
- .get('/users/:id', (req, res, next) => {
-   User.fetchOne(req)
-     .then(res.json)
-     .catch(next);
- })
- .put('/users/:id', bearerAuth, parserBody, (req, res, next) => {
-   User.update(req)
-     .then(res.json)
-     .catch(next);
- })
- .delete('/users/:id', bearerAuth, (req, res, next) => {
-   User.delete(req)
-     .then(() => res.sendStatus(204))
-     .catch(next);
- });
+
+  .get('/users', (req, res, next) => {
+    User.fetch(req)
+      .then(res.page)
+      .catch(next);
+  })
+  .get('/users/:id', (req, res, next) => {
+    User.fetchOne(req)
+      .then(res.json)
+      .catch(next);
+  })
+  .put('/users/:id', bearerAuth, parserBody, (req, res, next) => {
+    User.update(req)
+      .then(res.json)
+      .catch(next);
+  })
+  .delete('/users/:id', bearerAuth, (req, res, next) => {
+    User.delete(req)
+      .then(() => res.sendStatus(204))
+      .catch(next);
+  });

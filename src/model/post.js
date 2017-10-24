@@ -4,13 +4,16 @@ import createError from 'http-errors';
 import Mongoose, {Schema} from 'mongoose';
 
 const postSchema = new Schema({
-  url: {type: String, required: true},
+  url: {type: String},
   description: {type: String, required: true},
+  timeStamp: {type: Date, required: true},
   owner: {type: Schema.Types.ObjectId, required: true, ref:'user'},
+  ownerName: {type: String, required: true},
+  ownerAvatar: {type: String},
   comments: [{type: Schema.Types.ObjectId}],
 });
 
-const Post = Mongoose.model('post', postSchema); 
+const Post = Mongoose.model('post', postSchema);
 
 Post.validateRequest = function(req){
 
@@ -56,7 +59,7 @@ Post.fetchOne = function(req){
     // .populate('profile comments')
     .then(photo => {
       if(!photo)
-        throw createError(404, 'NOT FOUND ERROR: photo not found'); 
+        throw createError(404, 'NOT FOUND ERROR: photo not found');
       return photo;
     });
 };
@@ -67,7 +70,7 @@ Post.updatePostWithFile = function(req){
       return util.s3UploadMulterFileAndClean(file)
         .then(s3Data => {
           let update = {url: s3Data.Location};
-          if(req.body.description) update.description = req.body.description; 
+          if(req.body.description) update.description = req.body.description;
           return Post.findByIdAndUpdate(req.params.id, update, {new: true, runValidators: true});
         });
     });
@@ -98,4 +101,3 @@ Post.delete = function(req){
 };
 
 export default Post;
-

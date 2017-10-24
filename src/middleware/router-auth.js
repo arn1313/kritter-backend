@@ -59,7 +59,7 @@ export default new Router()
       .catch(next);
   })
   .get('/users/me', bearerAuth, (req, res, next) => {
-    User.findOne({username: {owner: req.user._id}})
+    User.findOne({username: req.user.username})
     .then(user => {
       console.log(user, '******user')
         if(!user)

@@ -40,8 +40,8 @@ export const bearerAuth = (req, res, next) => {
     .then((user) => {
       if(!user) {
         throw createError(401, 'AUTH ERROR: user not found');
+        console.log(user, '__USERINSIDE PARSER AUTH BEARERAUTH__')
         req.user = user;
-        console.log(req.user, '__USERINSIDE PARSER AUTH BEARERAUTH__')
         next();
       };
     })

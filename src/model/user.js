@@ -18,29 +18,29 @@ const userSchema =  new Schema({
   avatar: {type: String},
   bio: {type: String},
 });
-const User = Mongoose.model('user', userSchema);
 
 // INSTANCE METHODS
 userSchema.methods.passwordCompare = function(password){
-  return bcrypt.compare(password, this.passwordHash)
-    .then(success => {
-      if (!success)
-        throw createError(401, 'AUTH ERROR: wrong password');
-      return this;
-    });
+ return bcrypt.compare(password, this.passwordHash)
+ .then(success => {
+  if (!success)
+  throw createError(401, 'AUTH ERROR: wrong password');
+  return this;
+ });
 };
 
 userSchema.methods.tokenCreate  = function(){
-  this.randomHash = randomBytes(32).toString('base64');
-  return this.save()
-    .then(user => {
-      return jwt.sign({randomHash: this.randomHash}, process.env.SECRET);
-    })
-    .then(token => {
-      return token;
-    });
+ this.randomHash = randomBytes(32).toString('base64');
+ return this.save()
+ .then(user => {
+  return jwt.sign({randomHash: this.randomHash}, process.env.SECRET);
+ })
+ .then(token => {
+  return token;
+ });
 };
 
+const User = Mongoose.model('user', userSchema);
 // MODEL
 
 User.validateReqFile = function (req) {

@@ -58,14 +58,10 @@ export default new Router()
       .then(res.page)
       .catch(next);
   })
-  .get('/users/me', (req, res, next) => {
-    // console.log(req.query.query, 'req.body');
-    let searchUsername = req.query.query;
-    // console.log(req, 'req.body');
-    // console.log(req.search, 'req.search');
-    
-    User.findOne({username: `${searchUsername}`})
+  .get('/users/me', bearerAuth, (req, res, next) => {
+    User.findOne({username: {owner: req.user._id}})
     .then(user => {
+      console.log(user, '******user')
         if(!user)
           return next(createError(404, 'NOT FOUND ERROR: user not found'));
         res.json(user);

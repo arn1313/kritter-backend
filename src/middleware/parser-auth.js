@@ -35,6 +35,7 @@ export const bearerAuth = (req, res, next) => {
   
   let token = authorization.split('Bearer')[1];
   if(!token) return next(createError(400, 'AUTH ERROR: not bearer auth'));
+  console.log('%%%%%%%%%%%%', token)
   
   promisify(jwt.verify)(token, process.env.SECRET)
   .then(({randomHash}) => {

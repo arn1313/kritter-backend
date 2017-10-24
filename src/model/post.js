@@ -15,43 +15,60 @@ const postSchema = new Schema({
 
 const Post = Mongoose.model('post', postSchema);
 
-Post.validateRequest = function(req){
-
-  if(req.files.length > 1) {
-    let err = createError(400, 'VALIDATION ERROR: must have one file');
+Post.validateReqFile = function (req) {
+  if(req.files.length > 1){
     return util.removeMulterFiles(req.files)
-      .then(() => {throw err;});
+      .then(() => {
+        throw createError(400, 'VALIDATION ERROR: only one file permited');
+      });
   }
 
   let [file] = req.files;
-  if(file){
-    if(file.fieldname !== 'photo'){
-      let err = createError(400, 'VALIDATION ERROR: file must be on field photo');
+  if(file)
+    if(file.fieldname !== 'avatar')
       return util.removeMulterFiles(req.files)
-        .then(() => {throw err;});
-    }
-  }
+        .then(() => {
+          throw createError(400, 'VALIDATION ERROR: file must be for avatar');
+        });
 
   return Promise.resolve(file);
 };
 
 Post.create = function(req){
-  return Post.validateRequest(req)
-    .then(file => {
-      return util.s3UploadMulterFileAndClean(file)
-        .then(s3Data => {
+  console.log(req.body)
+  // return Post.validateReqFile(req)
+  //   .then((file) => {
+  //     return util.s3UploadMulterFileAndClean(file)
+  //       .then((s3Data) => {
           return new Post({
-            owner: req.user._id,
-            url: s3Data.Location,
-            description: req.body.description,
+            ownerName: req.user.ownerName,
+            ownerAvatar: req.user.ownerAvatar, 
+            description: req.user.description,
+            url: req.body.url,
+            timeStamp: req.user.timeStamp,
           }).save();
-        });
-    })
-    .then(post => {
-      return Post.findById(post._id)
-        .populate('user');
-    });
+    //     });
+    // });
 };
+
+// Post.create = function(req){
+//   conso
+//   return Post.validateRequest(req)
+//     .then(file => {
+//       return util.s3UploadMulterFileAndClean(file)
+//         .then(s3Data => {
+//           return new Post({
+//             owner: req.user._id,
+//             url: s3Data.Location,
+//             description: req.body.description,
+//           }).save();
+//         });
+//     })
+//     .then(post => {
+//       return Post.findById(post._id)
+//         .populate('user');
+//     });
+// };
 
 
 Post.fetchOne = function(req){

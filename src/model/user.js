@@ -18,6 +18,7 @@ const userSchema =  new Schema({
   avatar: {type: String},
   bio: {type: String},
 });
+const User = Mongoose.model('user', userSchema);
 
 // INSTANCE METHODS
 userSchema.methods.passwordCompare = function(password){
@@ -41,7 +42,6 @@ userSchema.methods.tokenCreate  = function(){
 };
 
 // MODEL
-const User = Mongoose.model('user', userSchema);
 
 User.validateReqFile = function (req) {
  if(req.files.length > 1){
@@ -69,23 +69,22 @@ User.create = function (user) {
     });
 };
 
-User.handleOAUTH = function(data) {
-  if(!data || !data.email) {
-    return Promise.reject(createError(400, 'VALIDATION ERROR - missing login info'))
-  }
+User.createProfileWithPhoto = function(req){
+ return Profile.validateReqFile(req)
+   .then((file) => {
+     return util.s3UploadMulterFileAndClean(file)
+       .then((s3Data) => {
+         return new Profile({
+           owner: req.user._id,
+           username: req.user.username, 
+           email: req.user.email,
+           bio: req.body.bio,
+           avatar: s3Data.Location,
+         }).save();
+       });
+   });
+};
 
-  return User.findOne({email: data.email})
-  .then(user => {
-    if(!user) throw new Error('not found - create user')
-    return user
-  })
-  .catch(() => {
-    return new User({
-      username: data.name.replace(' ', '_'),
-      email: data.email
-    }).save()
-  })
-}
 
 User.fetch = util.pagerCreate(User);
 

@@ -10,6 +10,7 @@ export default new Router()
 
   .post('/signup', parserBody, (req, res, next) => {
     log('__ROUTE__ POST /signup');
+    console.log(req.body, '__REQUEST ON SIGNUP_____')
 
     new User.create(req.body)
       .then(user => user.tokenCreate())
@@ -18,6 +19,12 @@ export default new Router()
 
         res.send(token);
       })
+      .catch(next);
+  })
+
+  .post('/profiles', bearerAuth, parserBody, (req, res, next) => {
+    User.create(req)
+      .then(res.json)
       .catch(next);
   })
   .get('/usernames/:username', (req, res, next) => {
@@ -51,6 +58,18 @@ export default new Router()
       .then(res.page)
       .catch(next);
   })
+  .get('/users/me', bearerAuth, (req, res, next) => {
+    console.log(req, '***********request on backend******');
+    User.findOne({username: "Aaron"})
+    .then(user => {
+      console.log(user, '******userfetched');
+        if(!user)
+          return next(createError(404, 'NOT FOUND ERROR: user not found'));
+        res.json(user);
+      })
+      .catch(next);
+  })
+
   .get('/users/:id', (req, res, next) => {
     User.fetchOne(req)
       .then(res.json)

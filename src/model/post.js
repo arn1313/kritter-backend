@@ -51,24 +51,6 @@ Post.create = function(req){
     // });
 };
 
-// Post.create = function(req){
-//   conso
-//   return Post.validateRequest(req)
-//     .then(file => {
-//       return util.s3UploadMulterFileAndClean(file)
-//         .then(s3Data => {
-//           return new Post({
-//             owner: req.user._id,
-//             url: s3Data.Location,
-//             description: req.body.description,
-//           }).save();
-//         });
-//     })
-//     .then(post => {
-//       return Post.findById(post._id)
-//         .populate('user');
-//     });
-// };
 
 
 Post.fetchOne = function(req){

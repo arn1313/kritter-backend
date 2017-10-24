@@ -16,6 +16,7 @@ const userSchema =  new Schema({
   passwordHash: {type: String},
   randomHash: {type: String,  unique: true, default: ''},
   avatar: {type: String},
+  species: {type: String},
   bio: {type: String},
 });
 

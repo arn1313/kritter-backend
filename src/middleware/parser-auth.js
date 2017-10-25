@@ -28,21 +28,25 @@ export const basicAuth = (req, res, next) => {
     .catch(next);
 };
 
-export const bearerAuth = (req, res, next) => {
-  let {authorization} = req.headers:
-  if(!authorization) return next(createError(400, 'AUTH ERROR: no authorization header'));
 
-  let token = authorization.split('Bearer')[1];
-  if(!token) return next(createError(400, 'AUTH ERROR: not bearer auth'));
+
+export const bearerAuth = (req, res, next) => {
+  let {authorization} = req.headers;
+  if(!authorization)
+    return next(createError(400, 'AUTH ERROR: no authorization header'));
+
+  let token = authorization.split('Bearer ')[1];
+  if(!token)
+    return next(createError(400, 'AUTH ERROR: not bearer auth'));
 
   promisify(jwt.verify)(token, process.env.SECRET)
     .then(({randomHash}) => User.findOne({randomHash}))
     .then((user) => {
-      if(!user) {
+      if(!user)
         throw createError(401, 'AUTH ERROR: user not found');
-        req.user = user;
-        next();
-      };
+      req.user = user;
+      console.log('THISISWHATWEWANT', user);
+      next();
     })
     .catch(partial(createError, 401));
 };

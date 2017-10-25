@@ -4,51 +4,56 @@ import createError from 'http-errors';
 import Mongoose, {Schema} from 'mongoose';
 
 const postSchema = new Schema({
-  url: {type: String, required: true},
+  url: {type: String},
   description: {type: String, required: true},
-  owner: {type: Schema.Types.ObjectId, required: true, ref:'user'},
+  timeStamp: {type: String, required: true},
+  // owner: {type: Schema.Types.ObjectId, required: true, ref:'user'},
+  ownerName: {type: String, required: true},
+  ownerId: {type: String, required: true},
+  ownerAvatar: {type: String},
   comments: [{type: Schema.Types.ObjectId}],
 });
 
-const Post = Mongoose.model('post', photoSchema); 
+const Post = Mongoose.model('post', postSchema);
 
-Post.validateRequest = function(req){
-
-  if(req.files.length > 1) {
-    let err = createError(400, 'VALIDATION ERROR: must have one file');
+Post.validateReqFile = function (req) {
+  if(req.files.length > 1){
     return util.removeMulterFiles(req.files)
-      .then(() => {throw err;});
+      .then(() => {
+        throw createError(400, 'VALIDATION ERROR: only one file permited');
+      });
   }
 
   let [file] = req.files;
-  if(file){
-    if(file.fieldname !== 'photo'){
-      let err = createError(400, 'VALIDATION ERROR: file must be on field photo');
+  if(file)
+    if(file.fieldname !== 'url')
       return util.removeMulterFiles(req.files)
-        .then(() => {throw err;});
-    }
-  }
+        .then(() => {
+          throw createError(400, 'VALIDATION ERROR: file must be for avatar');
+        });
 
   return Promise.resolve(file);
 };
 
 Post.create = function(req){
-  return Post.validateRequest(req)
-    .then(file => {
+  return Post.validateReqFile(req)
+    .then((file) => {
       return util.s3UploadMulterFileAndClean(file)
-        .then(s3Data => {
+        .then((s3Data) => {
+          console.log('%%%%%%%%%%%%', s3Data)
           return new Post({
-            owner: req.user._id,
-            url: s3Data.Location,
+            ownerName: req.body.ownerName,
+            ownerAvatar: req.body.ownerAvatar, 
+            ownerId: req.body.ownerId, 
             description: req.body.description,
+            url: s3Data.Location,
+            timeStamp: req.body.timeStamp,
           }).save();
         });
-    })
-    .then(post => {
-      return Post.findById(post._id)
-        .populate('user');
     });
 };
+
+Post.fetch = util.pagerCreate(Post);
 
 
 Post.fetchOne = function(req){
@@ -56,18 +61,20 @@ Post.fetchOne = function(req){
     // .populate('profile comments')
     .then(photo => {
       if(!photo)
-        throw createError(404, 'NOT FOUND ERROR: photo not found'); 
+        throw createError(404, 'NOT FOUND ERROR: photo not found');
       return photo;
     });
 };
 
 Post.updatePostWithFile = function(req){
-  return Post.validateRequest(req)
+  return Post.validateReqFile(req)
     .then(file => {
       return util.s3UploadMulterFileAndClean(file)
         .then(s3Data => {
           let update = {url: s3Data.Location};
-          if(req.body.description) update.description = req.body.description; 
+          if(req.body.description) update.description = req.body.description;
+          if(req.body) update.timeStamp = req.body.timeStamp; 
+
           return Post.findByIdAndUpdate(req.params.id, update, {new: true, runValidators: true});
         });
     });
@@ -90,12 +97,12 @@ Post.update = function(req){
 };
 
 Post.delete = function(req){
-  return Post.findOneAndRemove({_id: req.params.id, owner: req.user._id})
+  console.log('%%%%%%%%reqq',req);
+  return Post.findOneAndRemove({_id: req.params.id, ownerName: req.user.username})
     .then(user => {
       if(!user)
         throw createError(404, 'NOT FOUND ERROR: user not found');
     });
 };
 
-export default Photo;
-
+export default Post;

@@ -6,6 +6,7 @@ import {randomBytes} from 'crypto';
 import * as jwt from 'jsonwebtoken';
 import createError from 'http-errors';
 import {promisify} from '../lib/util.js';
+import * as util from '../lib/util.js';
 import Mongoose, {Schema} from 'mongoose';
 
 // SCHEMA
@@ -15,32 +16,33 @@ const userSchema =  new Schema({
   passwordHash: {type: String},
   randomHash: {type: String,  unique: true, default: ''},
   avatar: {type: String},
+  species: {type: String},
   bio: {type: String},
 });
 
 // INSTANCE METHODS
 userSchema.methods.passwordCompare = function(password){
-  return bcrypt.compare(password, this.passwordHash)
-    .then(success => {
-      if (!success)
-        throw createError(401, 'AUTH ERROR: wrong password');
-      return this;
-    });
+ return bcrypt.compare(password, this.passwordHash)
+ .then(success => {
+  if (!success)
+  throw createError(401, 'AUTH ERROR: wrong password');
+  return this;
+ });
 };
 
 userSchema.methods.tokenCreate  = function(){
-  this.randomHash = randomBytes(32).toString('base64');
-  return this.save()
-    .then(user => {
-      return jwt.sign({randomHash: this.randomHash}, process.env.SECRET);
-    })
-    .then(token => {
-      return token;
-    });
+ this.randomHash = randomBytes(32).toString('base64');
+ return this.save()
+ .then(user => {
+  return jwt.sign({randomHash: this.randomHash}, process.env.SECRET);
+ })
+ .then(token => {
+  return token;
+ });
 };
 
-// MODEL
 const User = Mongoose.model('user', userSchema);
+// MODEL
 
 User.validateReqFile = function (req) {
  if(req.files.length > 1){
@@ -49,6 +51,15 @@ User.validateReqFile = function (req) {
        throw createError(400, 'VALIDATION ERROR: only one file permited');
      });
  }
+ let [file] = req.files;
+ if(file)
+   if(file.fieldname !== 'avatar')
+     return util.removeMulterFiles(req.files)
+       .then(() => {
+         throw createError(400, 'VALIDATION ERROR: file must be for avatar');
+       });
+
+ return Promise.resolve(file);
 }
 
 
@@ -68,23 +79,22 @@ User.create = function (user) {
     });
 };
 
-User.handleOAUTH = function(data) {
-  if(!data || !data.email) {
-    return Promise.reject(createError(400, 'VALIDATION ERROR - missing login info'))
-  }
+User.createProfileWithPhoto = function(req){
+ return Profile.validateReqFile(req)
+   .then((file) => {
+     return util.s3UploadMulterFileAndClean(file)
+       .then((s3Data) => {
+         return new Profile({
+           owner: req.user._id,
+           username: req.user.username, 
+           email: req.user.email,
+           bio: req.body.bio,
+           avatar: s3Data.Location,
+         }).save();
+       });
+   });
+};
 
-  return User.findOne({email: data.email})
-  .then(user => {
-    if(!user) throw new Error('not found - create user')
-    return user
-  })
-  .catch(() => {
-    return new User({
-      username: data.name.replace(' ', '_'),
-      email: data.email
-    }).save()
-  })
-}
 
 User.fetch = util.pagerCreate(User);
 
@@ -103,7 +113,10 @@ User.updateUserWithPhoto = function(req) {
      return util.s3UploadMulterFileAndClean(file)
        .then((s3Data) => {
          let update = {avatar: s3Data.Location};
-         if(req.body.bio) update.bio = req.body.bio; 
+         if(req.body) update.bio = req.body.bio; 
+         if(req.body) update.username = req.body.username
+         if(req.body) update.email = req.body.email
+         if(req.body) update.species = req.body.species
          return User.findByIdAndUpdate(req.params.id, update, {new: true, runValidators: true});
        });
    });
@@ -113,7 +126,7 @@ User.update = function(req){
  if(req.files && req.files[0])
    return User.updateUserWithPhoto(req);
  let options = {new: true, runValidators: true};
- return Profile.findByIdAndUpdate(req.params.id, {bio: req.body.bio}, options);
+ return User.findByIdAndUpdate(req.params.id, {bio: req.body.bio, username: req.body.username, email: req.body.email, species: req.body.species}, options);
 };
 
 User.delete = function(req){

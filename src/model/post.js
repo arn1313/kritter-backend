@@ -6,8 +6,8 @@ import Mongoose, {Schema} from 'mongoose';
 const postSchema = new Schema({
   url: {type: String},
   description: {type: String, required: true},
-  timeStamp: {type: Date, required: true},
-  owner: {type: Schema.Types.ObjectId, required: true, ref:'user'},
+  // timeStamp: {type: String, required: true},
+  // owner: {type: Schema.Types.ObjectId, required: true, ref:'user'},
   ownerName: {type: String, required: true},
   ownerAvatar: {type: String},
   comments: [{type: Schema.Types.ObjectId}],
@@ -35,22 +35,22 @@ Post.validateReqFile = function (req) {
 };
 
 Post.create = function(req){
-  console.log(req.body)
   // return Post.validateReqFile(req)
   //   .then((file) => {
   //     return util.s3UploadMulterFileAndClean(file)
   //       .then((s3Data) => {
           return new Post({
-            ownerName: req.user.ownerName,
-            ownerAvatar: req.user.ownerAvatar, 
-            description: req.user.description,
-            url: req.body.url,
-            timeStamp: req.user.timeStamp,
+            ownerName: req.ownerName,
+            ownerAvatar: req.ownerAvatar, 
+            description: req.description,
+            url: req.url,
+            timeStamp: req.timeStamp,
           }).save();
     //     });
     // });
 };
 
+Post.fetch = util.pagerCreate(Post);
 
 
 Post.fetchOne = function(req){

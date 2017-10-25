@@ -51,6 +51,15 @@ User.validateReqFile = function (req) {
        throw createError(400, 'VALIDATION ERROR: only one file permited');
      });
  }
+ let [file] = req.files;
+ if(file)
+   if(file.fieldname !== 'avatar')
+     return util.removeMulterFiles(req.files)
+       .then(() => {
+         throw createError(400, 'VALIDATION ERROR: file must be for avatar');
+       });
+
+ return Promise.resolve(file);
 }
 
 
@@ -104,17 +113,20 @@ User.updateUserWithPhoto = function(req) {
      return util.s3UploadMulterFileAndClean(file)
        .then((s3Data) => {
          let update = {avatar: s3Data.Location};
-         if(req.body.bio) update.bio = req.body.bio; 
+         if(req.body) update.bio = req.body.bio; 
+         if(req.body) update.username = req.body.username
+         if(req.body) update.email = req.body.email
+         if(req.body) update.species = req.body.species
          return User.findByIdAndUpdate(req.params.id, update, {new: true, runValidators: true});
        });
    });
 };
 
 User.update = function(req){
- // if(req.files && req.files[0])
- //   return User.updateUserWithPhoto(req);
- // let options = {new: true, runValidators: true};
- return User.findByIdAndUpdate(req.params.id, {bio: req.body.bio, username: req.body.username, email: req.body.email, species: req.body.species});
+ if(req.files && req.files[0])
+   return User.updateUserWithPhoto(req);
+ let options = {new: true, runValidators: true};
+ return User.findByIdAndUpdate(req.params.id, {bio: req.body.bio, username: req.body.username, email: req.body.email, species: req.body.species}, options);
 };
 
 User.delete = function(req){

@@ -6,7 +6,7 @@ import Mongoose, {Schema} from 'mongoose';
 const postSchema = new Schema({
   url: {type: String},
   description: {type: String, required: true},
-  // timeStamp: {type: String, required: true},
+  timeStamp: {type: String, required: true},
   // owner: {type: Schema.Types.ObjectId, required: true, ref:'user'},
   ownerName: {type: String, required: true},
   ownerAvatar: {type: String},
@@ -25,7 +25,7 @@ Post.validateReqFile = function (req) {
 
   let [file] = req.files;
   if(file)
-    if(file.fieldname !== 'avatar')
+    if(file.fieldname !== 'url')
       return util.removeMulterFiles(req.files)
         .then(() => {
           throw createError(400, 'VALIDATION ERROR: file must be for avatar');
@@ -35,19 +35,20 @@ Post.validateReqFile = function (req) {
 };
 
 Post.create = function(req){
-  // return Post.validateReqFile(req)
-  //   .then((file) => {
-  //     return util.s3UploadMulterFileAndClean(file)
-  //       .then((s3Data) => {
+  return Post.validateReqFile(req)
+    .then((file) => {
+      return util.s3UploadMulterFileAndClean(file)
+        .then((s3Data) => {
+          console.log('%%%%%%%%%%%%', s3Data)
           return new Post({
-            ownerName: req.ownerName,
-            ownerAvatar: req.ownerAvatar, 
-            description: req.description,
-            url: req.url,
-            timeStamp: req.timeStamp,
+            ownerName: req.body.ownerName,
+            ownerAvatar: req.body.ownerAvatar, 
+            description: req.body.description,
+            url: s3Data.Location,
+            timeStamp: req.body.timeStamp,
           }).save();
-    //     });
-    // });
+        });
+    });
 };
 
 Post.fetch = util.pagerCreate(Post);

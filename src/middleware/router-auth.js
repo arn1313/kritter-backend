@@ -74,7 +74,7 @@ export default new Router()
       .then(res.json)
       .catch(next);
   })
-  .put('/users/:id', bearerAuth, parserBody, (req, res, next) => {
+  .put('/user/:id', parserBody, (req, res, next) => {
     User.update(req)
       .then(res.json)
       .catch(next);

@@ -111,10 +111,10 @@ User.updateUserWithPhoto = function(req) {
 };
 
 User.update = function(req){
- if(req.files && req.files[0])
-   return User.updateUserWithPhoto(req);
- let options = {new: true, runValidators: true};
- return Profile.findByIdAndUpdate(req.params.id, {bio: req.body.bio}, options);
+ // if(req.files && req.files[0])
+ //   return User.updateUserWithPhoto(req);
+ // let options = {new: true, runValidators: true};
+ return User.findByIdAndUpdate(req.params.id, {bio: req.body.bio, username: req.body.username, email: req.body.email, species: req.body.species});
 };
 
 User.delete = function(req){

@@ -4,7 +4,7 @@ import parserBody from './parser-body.js';
 import Post from '../model/post.js';
 
 export default new Router()
-  .post('/post', (req, res, next) => {
+  .post('/post', bearerAuth, parserBody, (req, res, next) => {
     console.log(req, '(((((((((((((((backend post REEQ')
     Post.create(req)
       .then(res.json)

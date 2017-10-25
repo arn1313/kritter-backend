@@ -22,20 +22,6 @@ export default new Router()
       .catch(next);
   })
 
-  .post('/profiles', bearerAuth, parserBody, (req, res, next) => {
-    User.create(req)
-      .then(res.json)
-      .catch(next);
-  })
-  .get('/usernames/:username', (req, res, next) => {
-    User.findOne({username: username})
-      .then(user => {
-        if(!user)
-          return res.sendStatus(409);
-        return res.sendStatus(200);
-      })
-      .catch(next);
-  })
   .get('/login', basicAuth, (req, res, next) => {
     log('__ROUTE__ GET /login');
     req.user.tokenCreate()
@@ -47,18 +33,12 @@ export default new Router()
       .catch(next);
   })
 
- //  .post('/users', bearerAuth, parserBody, (req, res, next) => {
- //   User.create(req)
- //     .then(res.json)
- //     .catch(next);
- // })
-
-  .get('/users', (req, res, next) => {
+  .get('/user', (req, res, next) => {
     User.fetch(req)
       .then(res.page)
       .catch(next);
   })
-  .get('/users/me', bearerAuth, (req, res, next) => {
+  .get('/user/me', bearerAuth, (req, res, next) => {
     User.findOne({username: req.user.username})
     .then(user => {
       console.log(user, '******user')
@@ -69,7 +49,7 @@ export default new Router()
       .catch(next);
   })
 
-  .get('/users/:id', (req, res, next) => {
+  .get('/user/:id', (req, res, next) => {
     User.fetchOne(req)
       .then(res.json)
       .catch(next);
@@ -79,7 +59,7 @@ export default new Router()
       .then(res.json)
       .catch(next);
   })
-  .delete('/users/:id', bearerAuth, (req, res, next) => {
+  .delete('/user/:id', bearerAuth, (req, res, next) => {
     User.delete(req)
       .then(() => res.sendStatus(204))
       .catch(next);

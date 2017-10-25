@@ -9,6 +9,7 @@ const postSchema = new Schema({
   timeStamp: {type: String, required: true},
   // owner: {type: Schema.Types.ObjectId, required: true, ref:'user'},
   ownerName: {type: String, required: true},
+  ownerId: {type: String, required: true},
   ownerAvatar: {type: String},
   comments: [{type: Schema.Types.ObjectId}],
 });
@@ -43,6 +44,7 @@ Post.create = function(req){
           return new Post({
             ownerName: req.body.ownerName,
             ownerAvatar: req.body.ownerAvatar, 
+            ownerId: req.body.ownerId, 
             description: req.body.description,
             url: s3Data.Location,
             timeStamp: req.body.timeStamp,
@@ -65,12 +67,14 @@ Post.fetchOne = function(req){
 };
 
 Post.updatePostWithFile = function(req){
-  return Post.validateRequest(req)
+  return Post.validateReqFile(req)
     .then(file => {
       return util.s3UploadMulterFileAndClean(file)
         .then(s3Data => {
           let update = {url: s3Data.Location};
           if(req.body.description) update.description = req.body.description;
+          if(req.body) update.timeStamp = req.body.timeStamp; 
+
           return Post.findByIdAndUpdate(req.params.id, update, {new: true, runValidators: true});
         });
     });

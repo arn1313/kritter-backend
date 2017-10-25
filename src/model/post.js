@@ -93,7 +93,8 @@ Post.update = function(req){
 };
 
 Post.delete = function(req){
-  return Post.findOneAndRemove({_id: req.params.id, owner: req.user._id})
+  console.log('%%%%%%%%reqq',req);
+  return Post.findOneAndRemove({_id: req.params.id, ownerName: req.user.username})
     .then(user => {
       if(!user)
         throw createError(404, 'NOT FOUND ERROR: user not found');

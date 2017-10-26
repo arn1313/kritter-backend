@@ -114,7 +114,7 @@ User.updateUserWithPhoto = function(req) {
        .then((s3Data) => {
          let update = {avatar: s3Data.Location};
          if(req.body) update.bio = req.body.bio; 
-         if(req.body) update.username = req.body.username
+         // if(req.body) update.username = req.body.username
          if(req.body) update.email = req.body.email
          if(req.body) update.species = req.body.species
          

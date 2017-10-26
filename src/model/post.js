@@ -5,6 +5,7 @@ import Mongoose, {Schema} from 'mongoose';
 
 const postSchema = new Schema({
   url: {type: String},
+  likes: {type: Number},
   description: {type: String, required: true},
   timeStamp: {type: String, required: true},
   // owner: {type: Schema.Types.ObjectId, required: true, ref:'user'},
@@ -42,6 +43,7 @@ Post.create = function(req){
         .then((s3Data) => {
           console.log('%%%%%%%%%%%%', s3Data)
           return new Post({
+            likes: req.body.likes,
             ownerName: req.body.ownerName,
             ownerAvatar: req.body.ownerAvatar, 
             ownerId: req.body.ownerId, 
@@ -88,7 +90,7 @@ Post.update = function(req){
           .populate('user');
       });
   let options = {new: true, runValidators: true};
-  let update = {description: req.body.description};
+  let update = {description: req.body.description, likes: req.body.likes};
   return Post.findByIdAndUpdate(req.params.id, update, options)
     .then(post => {
       return Post.findById(post._id)

@@ -117,6 +117,7 @@ User.updateUserWithPhoto = function(req) {
          if(req.body) update.username = req.body.username
          if(req.body) update.email = req.body.email
          if(req.body) update.species = req.body.species
+         
          return User.findByIdAndUpdate(req.params.id, update, {new: true, runValidators: true});
        });
    });

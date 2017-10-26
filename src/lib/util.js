@@ -56,6 +56,10 @@ export const s3UploadMulterFileAndClean = (data) => {
     .then(s3Data => fs.remove(data.path).then(() => s3Data));
 };
 
+export const s3ImageRekognition = (data) => {
+ return 
+}
+
 
 export const pagerCreate = (model, populate='') => (req, query={}) => {
   let offset = (Number(req.query.page) - 1) || 0;

@@ -11,6 +11,7 @@ export const mockPost = () => {
       description: faker.lorem.sentence(),
       user: user._id,
       owner: userData.user._id,
+      time
     })
     .save()
     .then(post => ({post, user, userData}))
@@ -25,3 +26,5 @@ export const mockManyPosts = (count=100) => {
     }, {}, postsData)
   })
 }
+
+

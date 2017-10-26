@@ -11,11 +11,11 @@ describe('router-user', () => {
   afterAll(server.stop)
   afterEach(cleanDB)
 
-  describe('POST /users', () => {
+  describe('POST /user', () => {
     let postJSONUser = (data) =>
       mockUser()
       .then(userData => {
-        return request.post(`${API_URL}/users`)
+        return request.post(`${API_URL}/user`)
         .set('Content-Type', 'application/json')
         .set('Authorization', `Bearer ${userData.token}`)
         .send(data)
@@ -25,7 +25,7 @@ describe('router-user', () => {
     let postMultipartUser = (data) =>
       mockUser()
       .then(userData => {
-        return request.post(`${API_URL}/users`)
+        return request.post(`${API_URL}/user`)
         .set('Content-Type', 'multipart/form-data')
         .set('Authorization', `Bearer ${userData.token}`)
         .attach('avatar', `${__dirname}/asset/test-asset.png`)
@@ -52,7 +52,7 @@ describe('router-user', () => {
     })
   })
 
-  describe('GET /users', () => {
+  describe('GET /user', () => {
     let getUserIdMap = _.reduce((result, next) =>
       ({...result, [next.user._id]: JSON.parse(JSON.stringify(next))}) , {})
 
@@ -68,10 +68,10 @@ describe('router-user', () => {
       })
     }
 
-    test('should return 100 users', () => {
+    test('should return 100 user', () => {
        return mockManyUsers(175)
       .then((userData) => {
-        return request.get(`${API_URL}/users`)
+        return request.get(`${API_URL}/user`)
         .then(res => {
           expect(res.status).toEqual(200)
           expect(res.body.count).toEqual(175)
@@ -87,7 +87,7 @@ describe('router-user', () => {
     test('?page=2 should return 50 users', () => {
      return mockManyUsers(150)
       .then((userData) => {
-        return request.get(`${API_URL}/users?page=2`)
+        return request.get(`${API_URL}/user?page=2`)
         .then(res => {
           expect(res.status).toEqual(200)
           expect(res.body.count).toEqual(150)
@@ -103,7 +103,7 @@ describe('router-user', () => {
     test('?page=-1 should return 10 users', () => {
      return mockManyUsers(10)
       .then((userData) => {
-        return request.get(`${API_URL}/users?page=-1`)
+        return request.get(`${API_URL}/user?page=-1`)
         .then(res => {
           expect(res.status).toEqual(200)
           expect(res.body.count).toEqual(10)
@@ -118,7 +118,7 @@ describe('router-user', () => {
     test('?page=2 should return 100 users', () => {
      return mockManyUsers(300)
       .then((userData) => {
-        return request.get(`${API_URL}/users?page=2`)
+        return request.get(`${API_URL}/user?page=2`)
         .then(res => {
           expect(res.status).toEqual(200)
           expect(res.body.count).toEqual(300)
@@ -134,7 +134,7 @@ describe('router-user', () => {
     test('?page=3 should return 0 users', () => {
      return mockManyUsers(10)
       .then(({userData, users}) => {
-        return request.get(`${API_URL}/users?page=3`)
+        return request.get(`${API_URL}/user?page=3`)
         .then(res => {
           expect(res.status).toEqual(200)
           expect(res.body.count).toEqual(10)
@@ -151,7 +151,7 @@ describe('router-user', () => {
     test('should return a user', () => {
       return mockSingleUser()
       .then(({userData, user}) => {
-        return request.get(`${API_URL}/users/${user._id}`)
+        return request.get(`${API_URL}/user/${user._id}`)
         .then(res => {
           expect(res.status).toEqual(200)
           user = JSON.parse(JSON.stringify(user))
@@ -161,7 +161,7 @@ describe('router-user', () => {
     })
 
     test('should return a 404', () => {
-      return request.get(`${API_URL}/users/597e89cbcc524228f3c8092e`)
+      return request.get(`${API_URL}/user/597e89cbcc524228f3c8092e`)
       .catch(res => {
         expect(res.status).toEqual(404)
       })
@@ -172,7 +172,7 @@ describe('router-user', () => {
     test('should return user user', () => {
       return mockSingleUser()
       .then(mock => {
-        return request(`${API_URL}/users/me`)
+        return request(`${API_URL}/user/me`)
         .set('Authorization', `Bearer ${mock.userData.token}`)
         .then(res => {
           expect(res.status).toEqual(200)
@@ -186,7 +186,7 @@ describe('router-user', () => {
     let putJSONUser = (bio) => {
       return mockSingleUser()
       .then(({userData, user}) => {
-        return request.put(`${API_URL}/users/${user._id}`)
+        return request.put(`${API_URL}/user/${user._id}`)
         .set('Authorization', `Bearer ${userData.token}`)
         .send({bio})
         .then(res => ({res, userData, user}))
@@ -196,7 +196,7 @@ describe('router-user', () => {
     let putMultipartUser = (bio) => {
       return mockSingleUser()
       .then(({userData, user}) => {
-        return request.put(`${API_URL}/users/${user._id}`)
+        return request.put(`${API_URL}/user/${user._id}`)
         .set('Authorization', `Bearer ${userData.token}`)
         .field('bio', bio)
         .attach('avatar', `${__dirname}/asset/test-asset.png`)
@@ -227,7 +227,7 @@ describe('router-user', () => {
     })
   })
 
-  describe('DELETE /users/:id', () => {
+  describe('DELETE /user/:id', () => {
     test('should return a 204 status', () => {
       return mockSingleUser()
       .then(({userData, user}) => {

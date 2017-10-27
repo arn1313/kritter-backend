@@ -8,6 +8,7 @@ const postSchema = new Schema({
   likes: {type: Number},
   description: {type: String, required: true},
   timeStamp: {type: String, required: true},
+  exactTime: {type: String, required: true},
   // owner: {type: Schema.Types.ObjectId, required: true, ref:'user'},
   ownerName: {type: String, required: true},
   ownerId: {type: String, required: true},
@@ -47,6 +48,7 @@ Post.create = function(req){
             ownerName: req.body.ownerName,
             ownerAvatar: req.body.ownerAvatar, 
             ownerId: req.body.ownerId, 
+            exactTime: req.body.exactTime,
             description: req.body.description,
             url: s3Data.Location,
             timeStamp: req.body.timeStamp,
@@ -76,6 +78,7 @@ Post.updatePostWithFile = function(req){
           let update = {url: s3Data.Location};
           if(req.body.description) update.description = req.body.description;
           if(req.body) update.timeStamp = req.body.timeStamp; 
+          if(req.body) update.exactTime = req.body.exactTime;
 
           return Post.findByIdAndUpdate(req.params.id, update, {new: true, runValidators: true});
         });

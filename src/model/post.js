@@ -22,7 +22,7 @@ Post.validateReqFile = function (req) {
   if(req.files.length > 1){
     return util.removeMulterFiles(req.files)
       .then(() => {
-        throw createError(400, 'VALIDATION ERROR: only one file permited');
+        throw createError(400, 'VALIDATION ERROR: only one file permitgit addted');
       });
   }
 
@@ -46,8 +46,8 @@ Post.create = function(req){
           return new Post({
             likes: req.body.likes,
             ownerName: req.body.ownerName,
-            ownerAvatar: req.body.ownerAvatar, 
-            ownerId: req.body.ownerId, 
+            ownerAvatar: req.body.ownerAvatar,
+            ownerId: req.body.ownerId,
             exactTime: req.body.exactTime,
             description: req.body.description,
             url: s3Data.Location,
@@ -77,7 +77,7 @@ Post.updatePostWithFile = function(req){
         .then(s3Data => {
           let update = {url: s3Data.Location};
           if(req.body.description) update.description = req.body.description;
-          if(req.body) update.timeStamp = req.body.timeStamp; 
+          if(req.body) update.timeStamp = req.body.timeStamp;
           if(req.body) update.exactTime = req.body.exactTime;
 
           return Post.findByIdAndUpdate(req.params.id, update, {new: true, runValidators: true});
